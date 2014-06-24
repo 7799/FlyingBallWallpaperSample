@@ -29,6 +29,7 @@ public class FlyingBallWallpaperService extends WallpaperService {
 
 		// 飛び回る玉を表示するインスタンス
 		private FlyingBallEffect flyingBallEffect;
+		private FlyingBallEffect2 flyingBallEffect2;
 
 		// 一定間隔で壁紙の再表示を行うためのスレッド
 		private final Runnable drawFlyingBall = new Runnable() {
@@ -36,12 +37,14 @@ public class FlyingBallWallpaperService extends WallpaperService {
 			public void run() {
 				// 一定間隔で玉を移動し表示する処理呼び出し
 				drawFrame();
+				drawFrame2();
 			}
 		};
 
 		// コンストラクタ
 		public FlyingBallEffectEngine() {
 			flyingBallEffect = new FlyingBallEffect();
+			flyingBallEffect2 = new FlyingBallEffect2();
 		}
 
 		// onDestroyメソッド(エンジン破棄時メソッド)
@@ -59,6 +62,7 @@ public class FlyingBallWallpaperService extends WallpaperService {
 			super.onSurfaceChanged(holder, format, width, height);
 			// 一定間隔で玉を移動し表示する処理呼び出し
 			drawFrame();
+				drawFrame2();
 		}
 
 		// onSurfaceDestroyedメソッド(Surface破棄時メソッド)
@@ -75,6 +79,7 @@ public class FlyingBallWallpaperService extends WallpaperService {
 		public void onDesiredSizeChanged(int desiredWidth, int desiredHeight) {
 			// 一定間隔で玉を移動し表示する処理呼び出し
 			drawFrame();
+				drawFrame2();
 		}
 
 		// onOffsetsChangedメソッド(壁紙位置変更時メソッド)
@@ -83,6 +88,7 @@ public class FlyingBallWallpaperService extends WallpaperService {
 				float yStep, int xPixels, int yPixels) {
 			// 一定間隔で玉を移動し表示する処理呼び出し
 			drawFrame();
+				drawFrame2();
 		}
 
 		// onVisibilityChangedメソッド(可視・不可視変更時メソッド)
@@ -92,6 +98,7 @@ public class FlyingBallWallpaperService extends WallpaperService {
 			if (visible) {
 				// 一定間隔で玉を移動し表示する処理呼び出し
 				drawFrame();
+				drawFrame2();
 			} else {
 				// 非表示となった場合、玉の移動を停止
 				handler.removeCallbacks(drawFlyingBall);
@@ -110,6 +117,31 @@ public class FlyingBallWallpaperService extends WallpaperService {
 				if (c != null) {
 					// 玉を移動し描画
 					flyingBallEffect.draw(c);
+				}
+			} finally {
+				if (c != null) {
+					// 描画終了
+					holder.unlockCanvasAndPost(c);
+				}
+			}
+			// 玉の移動を停止
+			handler.removeCallbacks(drawFlyingBall);
+			if (visible) {
+				// 表示状態の場合、一定時間停止後、再表示
+				handler.postDelayed(drawFlyingBall, REPEAT_INTERVAL);
+			}
+		}
+		private void drawFrame2() {
+			// サーフェイスホルダー取得
+			SurfaceHolder holder = getSurfaceHolder();
+
+			Canvas c = null;
+			try {
+				// キャンバス取得
+				c = holder.lockCanvas();
+				if (c != null) {
+					// 玉を移動し描画
+					flyingBallEffect2.draw(c);
 				}
 			} finally {
 				if (c != null) {
